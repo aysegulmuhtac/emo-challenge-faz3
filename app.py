@@ -5,15 +5,145 @@ import pickle
 import tempfile
 import os
 import gdown
-
+ 
 # ── Sayfa ayarları ────────────────────────────────────────────
 st.set_page_config(
     page_title="Emo-Challenge 2026",
-    page_icon="🎙️",
+    page_icon="🎭",
     layout="centered"
 )
-
-# ── Duygu emojileri ───────────────────────────────────────────
+ 
+# ── Özel CSS ──────────────────────────────────────────────────
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+ 
+    html, body, [class*="css"] {
+        font-family: 'Poppins', sans-serif;
+    }
+ 
+    .stApp {
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        min-height: 100vh;
+    }
+ 
+    .hero-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 40px 30px;
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 20px 60px rgba(102,126,234,0.4);
+    }
+ 
+    .hero-title {
+        font-size: 48px;
+        font-weight: 800;
+        color: white;
+        margin: 0;
+        letter-spacing: -1px;
+    }
+ 
+    .hero-sub {
+        font-size: 18px;
+        color: rgba(255,255,255,0.85);
+        margin-top: 8px;
+    }
+ 
+    .hero-team {
+        font-size: 14px;
+        color: rgba(255,255,255,0.65);
+        margin-top: 12px;
+        letter-spacing: 1px;
+    }
+ 
+    .badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 50px;
+        padding: 6px 18px;
+        font-size: 13px;
+        color: white;
+        margin-top: 14px;
+        backdrop-filter: blur(10px);
+    }
+ 
+    .upload-box {
+        background: rgba(255,255,255,0.05);
+        border: 2px dashed rgba(102,126,234,0.6);
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        margin: 20px 0;
+        transition: all 0.3s;
+    }
+ 
+    .result-card {
+        border-radius: 20px;
+        padding: 35px;
+        text-align: center;
+        margin: 25px 0;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        animation: fadeIn 0.5s ease;
+    }
+ 
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+ 
+    .result-emoji {
+        font-size: 90px;
+        margin-bottom: 10px;
+        display: block;
+    }
+ 
+    .result-label {
+        font-size: 36px;
+        font-weight: 800;
+        margin: 0;
+    }
+ 
+    .prob-label {
+        color: rgba(255,255,255,0.9);
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+ 
+    .section-title {
+        color: rgba(255,255,255,0.9);
+        font-size: 20px;
+        font-weight: 700;
+        margin: 25px 0 15px 0;
+        padding-left: 5px;
+        border-left: 4px solid #667eea;
+    }
+ 
+    .footer {
+        text-align: center;
+        color: rgba(255,255,255,0.35);
+        font-size: 12px;
+        margin-top: 50px;
+        padding: 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+ 
+    .stProgress > div > div > div > div {
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 10px;
+    }
+ 
+    div[data-testid="stFileUploader"] {
+        background: rgba(255,255,255,0.05);
+        border-radius: 12px;
+        padding: 10px;
+    }
+</style>
+""", unsafe_allow_html=True)
+ 
+# ── Duygu ayarları ────────────────────────────────────────────
 EMOJI = {
     'Furious': '😡',
     'Happy':   '😊',
@@ -21,30 +151,35 @@ EMOJI = {
     'Sad':     '😢',
     'Shocked': '😲'
 }
-
-RENK = {
-    'Furious': '#e74c3c',
-    'Happy':   '#f1c40f',
-    'Neutral': '#95a5a6',
-    'Sad':     '#3498db',
-    'Shocked': '#9b59b6'
+ 
+GRADIENT = {
+    'Furious': 'linear-gradient(135deg, #ff416c, #ff4b2b)',
+    'Happy':   'linear-gradient(135deg, #f7971e, #ffd200)',
+    'Neutral': 'linear-gradient(135deg, #4facfe, #00f2fe)',
+    'Sad':     'linear-gradient(135deg, #4776e6, #8e54e9)',
+    'Shocked': 'linear-gradient(135deg, #a18cd1, #fbc2eb)'
 }
-
+ 
+RENK = {
+    'Furious': '#ff416c',
+    'Happy':   '#f7971e',
+    'Neutral': '#4facfe',
+    'Sad':     '#4776e6',
+    'Shocked': '#a18cd1'
+}
+ 
 # ── Model yükleme ─────────────────────────────────────────────
 MODEL_DIR = 'models'
-
+ 
 @st.cache_resource
 def load_models():
     os.makedirs(MODEL_DIR, exist_ok=True)
-
-    # Google Drive dosya ID'leri
     files = {
         'model.pkl':         '1J7Vby6G15LQQyB4FJIgzjJxRYM_YSRvf',
         'scaler.pkl':        '1HWQFU3xvzkulf-wructZl_SCEi4ToZTn',
         'selector.pkl':      '160NjaN3RqBEFZ25vjaSLxuzeYDgDlunz',
         'label_encoder.pkl': '1aw2DpKfn-J9l_TJqqCNxqWxn0L0RwS0o'
     }
-
     for filename, file_id in files.items():
         path = f'{MODEL_DIR}/{filename}'
         if not os.path.exists(path):
@@ -53,7 +188,6 @@ def load_models():
                     f'https://drive.google.com/uc?id={file_id}',
                     path, quiet=True
                 )
-
     with open(f'{MODEL_DIR}/model.pkl', 'rb') as f:
         model = pickle.load(f)
     with open(f'{MODEL_DIR}/scaler.pkl', 'rb') as f:
@@ -62,9 +196,8 @@ def load_models():
         selector = pickle.load(f)
     with open(f'{MODEL_DIR}/label_encoder.pkl', 'rb') as f:
         le = pickle.load(f)
-
     return model, scaler, selector, le
-
+ 
 # ── Öznitelik çıkarma ─────────────────────────────────────────
 def ozellik_cikar(y, sr):
     try:
@@ -115,8 +248,7 @@ def ozellik_cikar(y, sr):
         return np.array(ozellikler, dtype=np.float32)
     except:
         return None
-
-# ── Tahmin fonksiyonu ─────────────────────────────────────────
+ 
 def tahmin_yap(audio_path, model, scaler, selector, le):
     y, sr = librosa.load(audio_path, duration=3, offset=0.5)
     feat = ozellik_cikar(y, sr)
@@ -128,72 +260,83 @@ def tahmin_yap(audio_path, model, scaler, selector, le):
     proba = model.predict_proba(feat_sel)[0]
     duygu = le.inverse_transform([pred])[0]
     return duygu, dict(zip(le.classes_, proba))
-
+ 
 # ── ARAYÜZ ───────────────────────────────────────────────────
-st.title("🎙️ Emo-Challenge 2026")
-st.markdown("### Gerçek Zamanlı Duygu Analizi")
-st.markdown("**Group 12** | Ayşegül Muhtaç · Sena Poyraz · Yiğit Kadir Gökdemir")
-st.markdown("---")
-
+ 
+# Hero
+st.markdown("""
+<div class="hero-box">
+    <div class="result-emoji">🎭</div>
+    <p class="hero-title">Emo-Challenge 2026</p>
+    <p class="hero-sub">Gerçek Zamanlı Duygu Analizi</p>
+    <p class="hero-team">GROUP 12 &nbsp;·&nbsp; Ayşegül Muhtaç &nbsp;·&nbsp; Sena Poyraz &nbsp;·&nbsp; Yiğit Kadir Gökdemir</p>
+    <span class="badge">🤖 Voting Ensemble &nbsp;|&nbsp; %94.37 Doğruluk</span>
+</div>
+""", unsafe_allow_html=True)
+ 
 # Model yükle
-with st.spinner('🤖 Model yükleniyor...'):
+with st.spinner('🤖 Model yükleniyor, lütfen bekleyin...'):
     try:
         model, scaler, selector, le = load_models()
-        st.success('✅ Model hazır! (%94.37 doğruluk)')
+        st.success('✅ Model hazır!')
     except Exception as e:
         st.error(f'❌ Model yüklenemedi: {e}')
         st.stop()
-
-st.markdown("---")
-
-# Dosya yükleme
-st.markdown("### 📂 Ses Dosyası Yükle")
+ 
+# Upload
+st.markdown('<p class="section-title">🎙️ Ses Dosyası Yükle</p>', unsafe_allow_html=True)
+st.markdown("WAV veya MP3 formatında bir ses dosyası yükleyin. Model sesin duygusunu analiz edecek.")
+ 
 uploaded = st.file_uploader(
-    "Bir WAV veya MP3 dosyası seçin",
+    "",
     type=['wav', 'mp3'],
-    help="Maksimum 3 saniyelik ses önerilir"
+    help="Maksimum 200MB, WAV veya MP3 formatı"
 )
-
+ 
 if uploaded:
     st.audio(uploaded, format='audio/wav')
-
-    with st.spinner('🔍 Analiz ediliyor...'):
+    st.markdown('<p class="section-title">🔍 Analiz Sonucu</p>', unsafe_allow_html=True)
+ 
+    with st.spinner('⚡ Ses analiz ediliyor...'):
         with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp:
             tmp.write(uploaded.read())
             tmp_path = tmp.name
-
         duygu, olasiliklar = tahmin_yap(tmp_path, model, scaler, selector, le)
         os.unlink(tmp_path)
-
+ 
     if duygu:
         emoji = EMOJI.get(duygu, '🎭')
-        renk = RENK.get(duygu, '#333')
-
-        st.markdown("---")
+        gradient = GRADIENT.get(duygu, 'linear-gradient(135deg, #667eea, #764ba2)')
+        renk = RENK.get(duygu, '#667eea')
+ 
         st.markdown(f"""
-        <div style='text-align:center; padding:30px;
-                    background-color:{renk}22;
-                    border-radius:15px;
-                    border: 2px solid {renk}'>
-            <h1 style='color:{renk}; font-size:80px; margin:0'>{emoji}</h1>
-            <h2 style='color:{renk}'>{duygu}</h2>
+        <div class="result-card" style="background: {gradient};">
+            <span class="result-emoji">{emoji}</span>
+            <p class="result-label" style="color:white">{duygu}</p>
+            <p style="color:rgba(255,255,255,0.8); font-size:14px; margin-top:8px">
+                Güven: %{olasiliklar[duygu]*100:.1f}
+            </p>
         </div>
         """, unsafe_allow_html=True)
-
-        st.markdown("#### 📊 Tüm Sınıf Olasılıkları")
-        for sinif, olasilik in sorted(olasiliklar.items(),
-                                       key=lambda x: x[1], reverse=True):
+ 
+        st.markdown('<p class="section-title">📊 Tüm Duygu Olasılıkları</p>', unsafe_allow_html=True)
+ 
+        for sinif, olasilik in sorted(olasiliklar.items(), key=lambda x: x[1], reverse=True):
             e = EMOJI.get(sinif, '🎭')
-            st.markdown(f"{e} **{sinif}**")
-            st.progress(float(olasilik),
-                        text=f"%{olasilik*100:.1f}")
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.markdown(f'<p class="prob-label">{e} {sinif}</p>', unsafe_allow_html=True)
+                st.progress(float(olasilik))
+            with col2:
+                st.markdown(f'<p style="color:white; font-weight:700; padding-top:25px">%{olasilik*100:.1f}</p>', unsafe_allow_html=True)
     else:
         st.error('❌ Ses analiz edilemedi, lütfen başka bir dosya deneyin.')
-
-st.markdown("---")
+ 
+# Footer
 st.markdown("""
-<div style='text-align:center; color:gray; font-size:12px'>
-BIL216 Signals and Systems | Emo-Challenge 2026 Faz 3<br>
-Model: Voting Ensemble (2×SVM + LightGBM + XGBoost + MLP) | Doğruluk: %94.37
+<div class="footer">
+    BIL216 Signals and Systems &nbsp;|&nbsp; Emo-Challenge 2026 Faz 3<br>
+    Voting Ensemble: 2×SVM + LightGBM + XGBoost + MLP &nbsp;|&nbsp; 424 Öznitelik &nbsp;|&nbsp; Data Augmentation
 </div>
 """, unsafe_allow_html=True)
+ 
