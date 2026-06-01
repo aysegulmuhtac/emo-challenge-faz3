@@ -91,6 +91,7 @@ st.markdown("""
     margin: 0 auto 24px;
     line-height: 1.7;
     font-weight: 400;
+    text-align: center;
 }
 .hero-team {
     font-size: 14px;
@@ -553,5 +554,4 @@ st.markdown("""
     <span style="color:#cbd5e1">Voting Ensemble: 2×SVM + LightGBM + XGBoost + MLP &nbsp;·&nbsp; 424 Features &nbsp;·&nbsp; Data Augmentation ×5</span>
 </div>
 """, unsafe_allow_html=True)
- 
  
