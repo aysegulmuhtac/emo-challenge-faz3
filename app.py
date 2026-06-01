@@ -85,13 +85,14 @@ st.markdown("""
     background-clip: text;
 }
 .hero-sub {
-    font-size: 18px;
-    color: #64748b;
-    max-width: 520px;
-    margin: 0 auto 24px;
-    line-height: 1.7;
-    font-weight: 400;
-    text-align: center;
+    font-size: 18px !important;
+    color: #64748b !important;
+    max-width: 520px !important;
+    margin: 0 auto 24px auto !important;
+    line-height: 1.7 !important;
+    font-weight: 400 !important;
+    text-align: center !important;
+    display: block !important;
 }
 .hero-team {
     font-size: 14px;
@@ -385,7 +386,7 @@ st.markdown("""
 <div class="hero">
     <div class="hero-eyebrow">AI · Speech · Emotion Recognition</div>
     <h1 class="hero-title">Real-Time <span>Emotion</span><br>Analysis System</h1>
-    <p class="hero-sub">Upload an audio file. The AI model analyzes acoustic features and detects the emotion in the voice.</p>
+    <p class="hero-sub" style="text-align:center;margin:0 auto 24px auto">Upload an audio file. The AI model analyzes acoustic features and detects the emotion in the voice.</p>
     <p class="hero-team">Group 12 &nbsp;·&nbsp; Ayşegül Muhtaç &nbsp;·&nbsp; Sena Poyraz &nbsp;·&nbsp; Yiğit Kadir Gökdemir</p>
 </div>
 """, unsafe_allow_html=True)
@@ -554,4 +555,3 @@ st.markdown("""
     <span style="color:#cbd5e1">Voting Ensemble: 2×SVM + LightGBM + XGBoost + MLP &nbsp;·&nbsp; 424 Features &nbsp;·&nbsp; Data Augmentation ×5</span>
 </div>
 """, unsafe_allow_html=True)
- 
