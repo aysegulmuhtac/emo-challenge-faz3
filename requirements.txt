@@ -1,4 +1,5 @@
 streamlit>=1.28.0
+setuptools>=68.0.0
 librosa==0.10.1
 scikit-learn==1.6.1
 xgboost==2.0.3
